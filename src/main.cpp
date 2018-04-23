@@ -42,11 +42,11 @@ int main()
   vector<VectorXd> ground_truth;
 
   // Output stream to hold nis values for each update time stamp
-  nis_out.open("./nis_out.txt", std::ofstream::trunc);
+  nis_out.open("./nis_out.csv", std::ofstream::trunc);
   assert(nis_out.is_open());
-  nis_out << std::setw(20) << "Timestamp (us)";
-  nis_out << std::setw(20) << "Sensor Type L/R";
-  nis_out << std::setw(20) << "NIS" << std::endl;
+  nis_out << "Timestamp (us),";
+  nis_out << "Sensor Type (L/R),";
+  nis_out << "NIS" << std::endl;
 
   h.onMessage([&ukf,&tools,&estimations,&ground_truth](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -151,9 +151,9 @@ int main()
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
 	 
           // Update nis value
-          nis_out << std::setw(20) << timestamp;
-          nis_out << std::setw(20) << sensor_type;
-          nis_out << std::setw(20) << ukf.nis_ << std::endl;
+          nis_out << timestamp << ",";
+          nis_out << sensor_type << ",";
+          nis_out << ukf.nis_ << std::endl;
         }
       } else {
         
