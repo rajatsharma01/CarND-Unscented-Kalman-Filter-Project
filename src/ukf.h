@@ -28,6 +28,9 @@ public:
   ///* state covariance matrix
   MatrixXd P_;
 
+  ///* measurement matrix for lidar
+  MatrixXd H_laser_;
+
   ///* predicted sigma points matrix
   MatrixXd Xsig_pred_;
 
@@ -67,6 +70,8 @@ public:
   ///* Sigma point spreading parameter
   double lambda_;
 
+  ///*  NIS value update on every measurement
+  double nis_;
 
   /**
    * Constructor
@@ -102,6 +107,15 @@ public:
    * @param meas_package The measurement at k+1
    */
   void UpdateRadar(MeasurementPackage meas_package);
+
+  /**
+   * Normalize the angle value to be between -M_PI and M_PI
+   * @param p pointer to the angle value to be normalized
+   */
+  void AngleNormalize(double *p) {
+      while (*p > M_PI) *p -= 2*M_PI;
+      while (*p < -M_PI) *p += 2*M_PI;
+  }
 };
 
 #endif /* UKF_H */

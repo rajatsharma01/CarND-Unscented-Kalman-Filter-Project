@@ -1,5 +1,6 @@
 #include <uWS/uWS.h>
 #include <iostream>
+#include <fstream>
 #include "json.hpp"
 #include <math.h>
 #include "ukf.h"
@@ -26,6 +27,8 @@ std::string hasData(std::string s) {
   return "";
 }
 
+std::ofstream nis_out;
+
 int main()
 {
   uWS::Hub h;
@@ -37,6 +40,13 @@ int main()
   Tools tools;
   vector<VectorXd> estimations;
   vector<VectorXd> ground_truth;
+
+  // Output stream to hold nis values for each update time stamp
+  nis_out.open("./nis_out.txt", std::ofstream::trunc);
+  assert(nis_out.is_open());
+  nis_out << std::setw(20) << "Timestamp (us)";
+  nis_out << std::setw(20) << "Sensor Type L/R";
+  nis_out << std::setw(20) << "NIS" << std::endl;
 
   h.onMessage([&ukf,&tools,&estimations,&ground_truth](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -139,7 +149,11 @@ int main()
           auto msg = "42[\"estimate_marker\"," + msgJson.dump() + "]";
           // std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
-	  
+	 
+          // Update nis value
+          nis_out << std::setw(20) << timestamp;
+          nis_out << std::setw(20) << sensor_type;
+          nis_out << std::setw(20) << ukf.nis_ << std::endl;
         }
       } else {
         
@@ -172,6 +186,9 @@ int main()
   h.onDisconnection([&h](uWS::WebSocket<uWS::SERVER> ws, int code, char *message, size_t length) {
     ws.close();
     std::cout << "Disconnected" << std::endl;
+    if (nis_out.is_open()) {
+        nis_out.close();
+    }
   });
 
   int port = 4567;
@@ -186,90 +203,3 @@ int main()
   }
   h.run();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
